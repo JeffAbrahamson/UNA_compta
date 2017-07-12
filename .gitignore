@@ -1,3 +1,11 @@
+# Emacs
+*~
+
+# LaTeX
+*.aux
+bilan_20*.tex
+bilan_20*.pdf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

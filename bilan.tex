@@ -1,0 +1,49 @@
+\documentclass[10 pt]{report}
+\usepackage[frenchb]{babel}
+%\usepackage{draftcopy}
+%\usepackage{url}
+%%% eurosym provides \euro
+%\usepackage{eurosym}
+%%% Use \pounds for GBP
+\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{tabu}
+
+\pagestyle{empty}
+\parskip=8 pt
+\raggedright
+
+\setlength{\hoffset}{-10mm}
+\addtolength{\textwidth}{30mm}
+
+\begin{document}
+
+\centerline{\Huge Budget}
+% Dates
+
+\begin{minipage}[t]{.47\textwidth}
+  \begin{tabu} to \linewidth {|X|r|r|}
+    \hline
+    Dépenses & Budget & Réalisé \\
+    \hline
+    \hline
+    {{expenses}}
+    \hline
+  \end{tabu}
+\end{minipage}
+\begin{minipage}[t]{.47\textwidth}
+  \begin{tabu} to \linewidth {|X|r|r|}
+    \hline
+    Recettes & Budget & Réalisé \\
+    \hline
+    \hline
+    {{income}}
+    \hline
+  \end{tabu}
+\end{minipage}
+
+
+
+\end{document}
+
