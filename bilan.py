@@ -86,6 +86,29 @@ def compute_balance_sheet_list(config_column, balances):
             balance_sheet_column.append([line[0], line[1], balance])
     return balance_sheet_column
 
+def scan_for_missing_accounts(config_column, balance_accounts):
+    """Print any expense or income accounts (6, 7) not in the config.
+
+    The data format of config_column is as for
+    compute_balance_sheet_list, above, though here it is both columns
+    and not just once side.
+
+    The balance_accounts is a list of accounts seen in the general ledger.
+
+    """
+    config_accounts = set()
+    for line in config_column:
+        if len(line) > 1:
+            these_accounts = set(line[2])
+            config_accounts = config_accounts.union(these_accounts)
+    income_expense_accounts = set()
+    income_or_expense = set(['6', '7'])
+    for account in balance_accounts:
+        if account[0] in income_or_expense:
+            income_expense_accounts.add(account)
+    print('Missing accounts from config: {m}'.format(
+        m=income_expense_accounts - config_accounts))
+
 def get_balance_sheet_as_list(config_filename, balances):
     """Group account balances as requested by the config.
 
@@ -106,6 +129,8 @@ def get_balance_sheet_as_list(config_filename, balances):
         config = eval(config_fp.read())
     expenses = compute_balance_sheet_list(config[0], balances)
     income = compute_balance_sheet_list(config[1], balances)
+    scan_for_missing_accounts(config[0] + config[1],
+                              [account for account, balance in balances.items()])
     return [expenses, income]
 
 def get_balance_sheet(config_filename, book_filename, max_date):
