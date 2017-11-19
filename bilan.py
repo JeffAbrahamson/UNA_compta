@@ -7,6 +7,7 @@ The input is an EBP text export of the current year's books.
 
 import argparse
 import datetime
+import numpy as np
 import pandas as pd
 import jinja2
 import os
@@ -59,8 +60,21 @@ def get_account_balances(book_filename, max_date):
 
     """
     book = get_data(book_filename, max_date)
-    # Make dict of { account -> balance }.
     account_sums = book.groupby(['account']).sum().to_dict()['Montant']
+    # Check that the groupby produces the sums that we expect.
+    book_expenses = book.loc[book['account'].str.startswith('6')].Montant.sum()
+    book_income = book.loc[book['account'].str.startswith('7')].Montant.sum()
+    account_expenses = sum([v for k,v in account_sums.items() if k[0] == '6'])
+    account_income = sum([v for k,v in account_sums.items() if k[0] == '7'])
+    print('Expect result of exercise = {result:.2f}\n'.format(
+        result= book_expenses + book_income))
+    if np.round(book_expenses, 2) != np.round(account_expenses, 2) or \
+       np.round(book_income, 2) != np.round(account_income, 2):
+        print('Unexpected imbalance:')
+        print('          {e:>11s}    {i:>11s}'.format(e='Expenses', i='Income'))
+        print('  Book:   {be:11.2f}    {bi:11.2f}'.format(be=book_expenses, bi=book_income))
+        print('  Group:  {ae:11.2f}    {ai:11.2f}'.format(ae=account_expenses, ai=account_income))
+        print('')
     return account_sums
 
 def compute_balance_sheet_list(config_column, balances):
@@ -81,8 +95,8 @@ def compute_balance_sheet_list(config_column, balances):
             balance_sheet_column.append(line)
         else:
             these_accounts = set(line[2])
-            balance = abs(sum([balance for account, balance in balances.items()
-                               if account in these_accounts]))
+            balance = sum([balance for account, balance in balances.items()
+                           if account in these_accounts])
             balance_sheet_column.append([line[0], line[1], balance])
     return balance_sheet_column
 
@@ -91,7 +105,7 @@ def scan_for_missing_accounts(config_column, balance_accounts):
 
     The data format of config_column is as for
     compute_balance_sheet_list, above, though here it is both columns
-    and not just once side.
+    and not just one side.
 
     The balance_accounts is a list of accounts seen in the general ledger.
 
@@ -106,18 +120,24 @@ def scan_for_missing_accounts(config_column, balance_accounts):
     for account in balance_accounts:
         if account[0] in income_or_expense:
             income_expense_accounts.add(account)
-    print('Missing accounts from config: {m}'.format(
-        m=income_expense_accounts - config_accounts))
+    missing_accounts = income_expense_accounts - config_accounts
+    if len(missing_accounts) > 0:
+        warning_separator = '================'
+        print('{sep}\nMissing accounts from config: {m}\n{sep}'.format(
+            sep=warning_separator,
+            m=missing_accounts))
 
 def get_balance_sheet_as_list(config_filename, balances):
     """Group account balances as requested by the config.
 
     The contents of config_filename is python code.  It should be a
-    list of two lists, each of which contains two or three members:
-      - The balance sheet line name
+    list of two lists, each of which contains one or three members:
+      - The balance sheet line name.  If this is the only list element,
+        then it is a title.
       - Budget (eventually should go to a separate file)
-      - Either absent or a list of accounts to aggregate.  If absent,
-        then this is a title.
+      - A list of accounts to aggregate.
+
+    The dict balances maps account name to account balance.
 
     The returned list contains two lists, the first for expenses, the
     second for income.  In each list, the elements contain a list
@@ -129,6 +149,24 @@ def get_balance_sheet_as_list(config_filename, balances):
         config = eval(config_fp.read())
     expenses = compute_balance_sheet_list(config[0], balances)
     income = compute_balance_sheet_list(config[1], balances)
+    ## Double check that we've got everything.
+    account_expenses = sum([v for k,v in balances.items() if k[0] == '6'])
+    account_income = sum([v for k,v in balances.items() if k[0] == '7'])
+    display_expenses = sum([x[2] for x in expenses if len(x) == 3])
+    #print(expenses)
+    for x in expenses:
+        if len(x) == 3:
+            print(x)
+    #print(x for x in expenses if len(x) == 3])
+    display_income = sum([x[2] for x in income if len(x) == 3])
+    if np.round(account_expenses, 2) != np.round(display_expenses, 2) or \
+       np.round(account_income, 2) != np.round(display_income, 2):
+        print('Unexpected imbalance:')
+        print('            {e:>11s}    {i:>11s}'.format(e='Expenses', i='Income'))
+        print('  Balances: {ge:11.2f}    {gi:11.2f}'.format(ge=account_expenses, gi=account_income))
+        print('  Display:  {de:11.2f}    {di:11.2f}'.format(de=display_expenses, di=display_income))
+        print('')
+    ## End double-check.
     scan_for_missing_accounts(config[0] + config[1],
                               [account for account, balance in balances.items()])
     return [expenses, income]
