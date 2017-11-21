@@ -145,11 +145,6 @@ def get_balance_sheet_as_list(config_filename, balances):
     account_expenses = sum([v for k,v in balances.items() if k[0] == '6'])
     account_income = sum([v for k,v in balances.items() if k[0] == '7'])
     display_expenses = sum([x[2] for x in expenses if len(x) == 3])
-    #print(expenses)
-    for x in expenses:
-        if len(x) == 3:
-            print(x)
-    #print(x for x in expenses if len(x) == 3])
     display_income = sum([x[2] for x in income if len(x) == 3])
     if np.round(account_expenses, 2) != np.round(display_expenses, 2) or \
        np.round(account_income, 2) != np.round(display_income, 2):
@@ -232,7 +227,7 @@ def render_as_latex_one_column(balance_sheet_column, multiplier=1):
             table += '\n'
     table += r'\hline' + '\n'
     table += r'Total & {budget:6.0f} & {realised:6.0f}\\'.format(
-        nothing='', budget=total_budget, realised=total_realised)
+        nothing='', budget=total_budget, realised=multiplier * total_realised)
     table += '\n'
     return table;
 
