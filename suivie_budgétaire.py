@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-"""Compute a (French-style) balance sheet.
+"""Compute a (French-style) budget tracking (suivie budgétaire).
 
-The input is an EBP text export of the current year's books.
+The input is a text export of the current year's books.
 """
 
 import argparse
@@ -24,29 +24,21 @@ def valid_date(date_str):
 
 def get_data(book_filename, max_date):
     """Fetch book data, return as a pandas DataFrame.
+
+    Try to divine the input file format.  If we can't, we'll need a
+    new case, and so we say so and bail out.  We determine the format
+    by looking at the first line, so it's quite dependent on how one
+    exports.  I export all fields in the order proposed by the
+    accounting program (EBP or gnucash, for the moment).
+
     """
-    with open(book_filename, 'r') as book_fp:
-        book = pd.read_csv(
-            book_fp, sep=';', header=0,
-            names=["Code journal", "Description du journal", "Date",
-                   "Date au format L47", "account", "Intitulé du compte",
-                   "Pièce", "Date de pièce", "Document", "Libellé", "Débit",
-                   "Crédit", "Montant",
-                   "Montant (associé au sens)", "Sens", "Statut",
-                   "Date de lettrage", "Lettrage", "Partiel",
-                   "Date de l'échéance", "Moyen de paiement", "Notes",
-                   "N° de ligne pour les documents associés",
-                   "Documents associés", "Plan analytique", "Poste analytique"],
-            usecols=["Date", "account", "Intitulé du compte",
-                     "Pièce", "Date de pièce", "Document", "Libellé",
-                     "Montant"],
-            parse_dates=['Date', 'Date de pièce'],
-            dayfirst=True,
-        )
+    with open(book_filename, 'r', encoding='utf-8-sig') as book_fp:
+        book = pd.read_csv(book_fp, parse_dates=['date'])
+    book.fillna('', inplace=True)
     if max_date is None:
         filtered_book = book
     else:
-        filtered_book = book[book.Date <= max_date]
+        filtered_book = book[book.date <= max_date]
     return filtered_book
 
 def get_account_balances(book_filename, max_date):
@@ -60,10 +52,10 @@ def get_account_balances(book_filename, max_date):
 
     """
     book = get_data(book_filename, max_date)
-    account_sums = book.groupby(['account']).sum().to_dict()['Montant']
+    account_sums = book.groupby(['account']).sum().to_dict()['amount']
     # Check that the groupby produces the sums that we expect.
-    book_expenses = book.loc[book['account'].str.startswith('6')].Montant.sum()
-    book_income = book.loc[book['account'].str.startswith('7')].Montant.sum()
+    book_expenses = book.loc[book['account'].str.startswith('6')].amount.sum()
+    book_income = book.loc[book['account'].str.startswith('7')].amount.sum()
     account_expenses = sum([v for k,v in account_sums.items() if k[0] == '6'])
     account_income = sum([v for k,v in account_sums.items() if k[0] == '7'])
     print('Expect result of exercise = {result:.2f}\n'.format(
@@ -180,7 +172,7 @@ def get_balance_sheet(config_filename, book_filename, max_date):
                         if len(line) == 3])
     sum_income = sum([line[2] for line in balance_sheet[1]
                         if len(line) == 3])
-    result = sum_income - sum_expenses
+    result = -(sum_income + sum_expenses)
     balance_sheet[0].append(["Résultat de l'exercice", 0, result])
     return balance_sheet
 
@@ -213,13 +205,18 @@ def render_as_text(balance_sheet):
     print('\n==== Recettes ====')
     render_as_text_one_column(balance_sheet[1])
 
-def render_as_latex_one_column(balance_sheet_column):
+def render_as_latex_one_column(balance_sheet_column, multiplier=1):
     """Return a string that is the latex for one column.
 
     We're in a tabu environment with three columns.  Return a sequence
     of "label & budget & balance" lines.
 
+    Multiplier is 1 or -1.
+
     """
+    if multiplier != 1 and multiplier != -1:
+        print('Bailing out:  Bad multiplier: {m}'.format(m=multiplier))
+        return
     table = ""
     total_budget = 0
     total_realised = 0
@@ -231,7 +228,7 @@ def render_as_latex_one_column(balance_sheet_column):
             total_budget += line[1]
             total_realised += line[2]
             table += r'{label}&{budget:6.0f}&{realised:6.0f}\\[1mm]'.format(
-                label=line[0], budget=line[1], realised=line[2])
+                label=line[0], budget=line[1], realised=multiplier * line[2])
             table += '\n'
     table += r'\hline' + '\n'
     table += r'Total & {budget:6.0f} & {realised:6.0f}\\'.format(
@@ -256,19 +253,16 @@ def render_as_latex(balance_sheet):
     with open(out_filename, 'w') as fp_latex:
         fp_latex.write(template.render(
             expenses=render_as_latex_one_column(balance_sheet[0]),
-            income=render_as_latex_one_column(balance_sheet[1])))
+            income=render_as_latex_one_column(balance_sheet[1], -1)))
     os.system('pdflatex ' + out_filename)
 
 def main():
     """Do what we do."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, required=True,
-                        default='',
                         help='config file mapping accounts to BS lines')
-    parser.add_argument('--book', type=str, required=False,
-                        default='/home/jeff/work/UNA/comite-directeur/trésorier/' +
-                        'ebp-compta-exports/export.txt',
-                        help='filename containing text export of book')
+    parser.add_argument('--book', type=str, required=True,
+                        help='filename containing canonicalised text export of book')
     parser.add_argument('--max_date', type=valid_date, required=False,
                         default=None,
                         help='Cut-off date for inclusion in balance sheet, format YYYY-MM-DD')

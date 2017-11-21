@@ -2,5 +2,5 @@
 
 rm bilan_20*
 
-book=/home/jeff/work/UNA/comite-directeur/trésorier/ebp-compta-exports/export.txt
-./bilan.py --config bilan.cfg  --book $book --render-as latex
+book=/home/jeff/.una/2017.csv
+./suivie_budgétaire.py --config budget.cfg  --book $book --render-as latex
