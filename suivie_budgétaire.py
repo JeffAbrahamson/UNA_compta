@@ -237,19 +237,19 @@ def render_as_latex_one_column(balance_sheet_column, multiplier=1):
     return table;
 
 def render_as_latex(balance_sheet):
-    """Print the balance sheet to bilan_<date>.tex as latex.
+    """Print the balance sheet to budget_<date>.tex as latex.
 
     The balance sheet is in list of lists format.  The first list is
     expenses, the second income.  Cf comment in
     get_balance_sheet_as_list() for more.
 
-    Latex the file to create bilan_<date>.pdf.
+    Latex the file to create budget_<date>.pdf.
 
     """
-    with open('bilan.tex', 'r') as fp_template:
+    with open('budget.tex', 'r') as fp_template:
         template_text = fp_template.read()
     template = jinja2.Template(template_text)
-    out_filename = 'bilan_{date}.tex'.format(date=datetime.date.today().strftime('%Y%m%d'))
+    out_filename = 'budget_{date}.tex'.format(date=datetime.date.today().strftime('%Y%m%d'))
     with open(out_filename, 'w') as fp_latex:
         fp_latex.write(template.render(
             expenses=render_as_latex_one_column(balance_sheet[0]),
