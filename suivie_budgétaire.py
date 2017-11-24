@@ -2,7 +2,9 @@
 
 """Compute a (French-style) budget tracking (suivie budgétaire).
 
-The input is a text export of the current year's books.
+The input is a text export of the current year's books, as output by
+una_canonical.py.
+
 """
 
 import argparse
@@ -255,7 +257,7 @@ def main():
     """Do what we do."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, required=True,
-                        help='config file mapping accounts to BS lines')
+                        help='config file mapping accounts to budget lines')
     parser.add_argument('--book', type=str, required=True,
                         help='filename containing canonicalised text export of book')
     parser.add_argument('--max_date', type=valid_date, required=False,
@@ -265,11 +267,11 @@ def main():
                         default='text',
                         help='One of text or latex')
     args = parser.parse_args()
-    balance_sheet = get_balance_sheet(args.config, args.book, args.max_date)
+    balances = get_balance_sheet(args.config, args.book, args.max_date)
     if 'text' == args.render_as:
-        render_as_text(balance_sheet)
+        render_as_text(balances)
     if 'latex' == args.render_as:
-        render_as_latex(balance_sheet)
+        render_as_latex(balances)
 
 if __name__ == '__main__':
     main()
