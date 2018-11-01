@@ -1,0 +1,69 @@
+\documentclass[10 pt]{report}
+\usepackage[frenchb]{babel}
+%\usepackage{draftwatermark}
+%\usepackage{url}
+%%% eurosym provides \euro
+\usepackage{eurosym}
+%%% Use \pounds for GBP
+\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{longtable}
+
+%\SetWatermarkText{provisoire}
+%\SetWatermarkScale{3}
+
+\pagestyle{empty}
+\parskip=8 pt
+\raggedright
+
+\setlength{\hoffset}{-10mm}
+\addtolength{\textwidth}{30mm}
+
+\begin{document}
+
+{\Huge Charges et Dépenses}
+
+{\Large Charges}
+\bigskip
+
+{% for account in charges|sort(attribute='name') %}
+\textbf{ {{ account.name }} : {{ account.balance }} \euro }\\
+\begin{longtable}[l]{l l | r | r | r}
+\hline
+Date & Description & Debit & Credit & Solde \\
+\hline
+\hline
+{% for line in account.lines %}
+  {{ line.date }} & {{ line.description }}
+  & {{ line.debit }} & {{ line.credit }} & {{ line.balance }} \euro \\
+{% endfor %}
+\hline
+\end{longtable}
+\bigskip
+{% endfor %}
+
+{\Large Produits}
+\bigskip
+
+{% for account in produits|sort(attribute='name') %}
+\textbf{ {{ account.name }} : {{ account.balance }} \euro } \\
+\begin{longtable}[l]{l l | r | r | r}
+\hline
+Date & Description & Debit & Credit & Solde \\
+\hline
+\hline
+{% for line in account.lines %}
+  {{ line.date }} & {{ line.description }}
+  & {{ line.debit }} & {{ line.credit }} & {{ line.balance }} \euro \\
+{% endfor %}
+\hline
+\end{longtable}
+\bigskip
+{% endfor %}
+
+\bigskip
+\textit{\small Arrêté le {{ quand }}.}
+
+\end{document}
+
