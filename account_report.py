@@ -27,7 +27,7 @@ def main():
         transaction = split.transaction
         for split_line in transaction.splits:
             if split_line.account.name == account_code:
-                balance += float(split_line.quantity)
+                value = float(split_line.quantity)
                 if split_line.quantity < 0:
                     dx = '{amt:10.2f}'.format(amt=split_line.quantity)
                     cx = ''
@@ -46,9 +46,13 @@ def main():
                 if len([state for state in bank_reconcile_state
                         if state != 'y' and state != 'v']) > 0:
                     num += '[*]'
-                descr = transaction.description
-                bal = balance
-                table.append([date, num, descr, dx, cx, bal])
+                descr = transaction.description[:40]
+                table.append([date, num, descr, dx, cx, value])
+    table.sort(key=lambda x: x[0])
+    bal = 0
+    for row in table:
+        bal += row[5]
+        row[5] = bal
     print(tabulate(table, header, 'fancy_grid'))
 
     # Also available:
