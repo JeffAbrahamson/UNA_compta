@@ -164,7 +164,7 @@ def render_as_latex_one_column(budget_column):
     table += '\n'
     return table;
 
-def render_as_latex(budget):
+def render_as_latex(out_filename, template, budget):
     """Print the balance sheet to budget_<date>.tex as latex.
 
     The balance sheet is in list of lists format.  The first list is
@@ -174,11 +174,9 @@ def render_as_latex(budget):
     Latex the file to create budget_<date>.pdf.
 
     """
-    with open('budget_comparison.tex', 'r') as fp_template:
+    with open(template, 'r') as fp_template:
         template_text = fp_template.read()
     template = jinja2.Template(template_text)
-    out_filename = 'budget-comparison_{date}.tex'.format(
-        date=datetime.date.today().strftime('%Y%m%d'))
     with open(out_filename, 'w') as fp_latex:
         fp_latex.write(template.render(
             expenses=render_as_latex_one_column(budget[0]),
@@ -191,17 +189,21 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config-N', type=str, required=True,
                         help='config file mapping accounts to budget lines, year N')
+    parser.add_argument('--template', type=str, required=True,
+                        help='latex template')
     parser.add_argument('--config-N1', type=str, required=True,
                         help='config file mapping accounts to budget lines, year N+1')
-    parser.add_argument('--render-as', type=str, required=False,
+    parser.add_argument('--outfile', type=str, required=True,
+                        help='filename of output tex/pdf')
+    parser.add_argument('--format', type=str, required=False,
                         default='text',
                         help='One of text or latex')
     args = parser.parse_args()
     budgets = compare_budgets(args.config_N, args.config_N1)
-    if 'text' == args.render_as:
+    if 'text' == args.format:
         render_as_text(budgets)
-    if 'latex' == args.render_as:
-        render_as_latex(budgets)
+    if 'latex' == args.format:
+        render_as_latex(args.outfile, args.template, budgets)
 
 if __name__ == '__main__':
     main()
