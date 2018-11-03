@@ -25,29 +25,27 @@ def main():
     header = ['Date', 'Num', 'Descr', 'Dx', 'Cx', 'Solde']
     for split in account.splits:
         transaction = split.transaction
-        for split_line in transaction.splits:
-            if split_line.account.name == account_code:
-                value = float(split_line.quantity)
-                if split_line.quantity < 0:
-                    dx = '{amt:10.2f}'.format(amt=split_line.quantity)
-                    cx = ''
-                else:
-                    dx = ''
-                    cx = '{amt:10.2f}'.format(amt=split_line.quantity)
-                date = transaction.post_date
-                num = transaction.num
-                # If this transaction has a portion against a bank
-                # account and that portion is not yet reconciled,
-                # indicate that with an '*'.
-                bank_reconcile_state =  [x.reconcile_state
-                                         for x
-                                         in transaction.splits
-                                         if x.account.name.startswith('512')]
-                if len([state for state in bank_reconcile_state
-                        if state != 'y' and state != 'v']) > 0:
-                    num += '[*]'
-                descr = transaction.description[:40]
-                table.append([date, num, descr, dx, cx, value])
+        value = float(split.quantity)
+        if split.quantity < 0:
+            dx = '{amt:10.2f}'.format(amt=split.quantity)
+            cx = ''
+        else:
+            dx = ''
+            cx = '{amt:10.2f}'.format(amt=split.quantity)
+        date = transaction.post_date
+        num = transaction.num
+        # If this transaction has a portion against a bank
+        # account and that portion is not yet reconciled,
+        # indicate that with an '*'.
+        bank_reconcile_state =  [x.reconcile_state
+                                 for x
+                                 in transaction.splits
+                                 if x.account.name.startswith('512')]
+        if len([state for state in bank_reconcile_state
+                if state != 'y' and state != 'v']) > 0:
+            num += '[*]'
+        descr = transaction.description[:40]
+        table.append([date, num, descr, dx, cx, value])
     table.sort(key=lambda x: x[0])
     bal = 0
     for row in table:
