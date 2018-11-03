@@ -2,8 +2,7 @@
 
 """Compute a (French-style) budget tracking (suivie budgétaire).
 
-The input is a text export of the current year's books, as output by
-una_canonical.py.
+The input is a sqlite3-format gnucash file.
 
 """
 
