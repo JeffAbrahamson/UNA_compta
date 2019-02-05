@@ -9,10 +9,6 @@ import pandas as pd
 import sys
 from tabulate import tabulate
 
-# We have several get_data() functions, as the format changes slightly
-# from campaign to campaign.  The dataframe that they each return should
-# be the same format.
-
 def get_account_mappings(config_filename):
     """Get the mapping from helloasso descriptions to accounts.
 
@@ -73,14 +69,6 @@ def find_account(config, descr, sub_descr, don):
 
 def make_find_account(config):
     def this_find_account(row):
-        ret = find_account(config, row['description'], row['sub_description'],
-                           'Don unique' == row['Type'])
-        if type(ret) != str:
-            print(type(ret))
-            print('{d}//{s}//{n}'.format(d=row['description'],
-                                         s=row['sub_description'],
-                                         n=('Don unique' == row['Type'])))
-            print(row)
         return find_account(config, row['description'], row['sub_description'],
                             'Don unique' == row['Type'])
     return this_find_account
