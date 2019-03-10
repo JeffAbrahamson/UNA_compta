@@ -1,0 +1,70 @@
+\documentclass[10 pt]{report}
+\usepackage[frenchb]{babel}
+%\usepackage{draftwatermark}
+%\usepackage{url}
+%%% eurosym provides \euro
+%\usepackage{eurosym}
+%%% Use \pounds for GBP
+\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{tabu}
+
+%\SetWatermarkText{provisoire}
+%\SetWatermarkScale{3}
+
+\pagestyle{empty}
+\parskip=8 pt
+\raggedright
+
+\setlength{\hoffset}{-10mm}
+\addtolength{\textwidth}{30mm}
+
+\begin{document}
+
+\centerline{\Huge\bf Bilan : Actif}
+
+\begin{tabu} to \linewidth {|p{9cm}|r|r|r||r|}
+  \hline
+  & \multicolumn{3}{c||}{Année $N$} & $N-1$ \\
+  \hline
+  &  & \multicolumn{1}{c|}{Amortissement} &  & \\
+  & \multicolumn{1}{c|}{Valeur} & \multicolumn{1}{c|}{et} &
+    \multicolumn{1}{c||}{Valeur} & \multicolumn{1}{c|}{Valeur} \\
+  & \multicolumn{1}{c|}{brute}  & \multicolumn{1}{c|}{provisions} &
+    \multicolumn{1}{c||}{nette}  & \multicolumn{1}{c|}{nette}  \\
+  \hline
+  \hline
+  {{ assets }}
+  \hline
+\end{tabu}
+
+\pagebreak
+\centerline{\Huge\bf Bilan : Passif}
+
+\begin{tabu} to \linewidth {|p{11cm}|r||r|}
+  \hline
+  & Année $N$ & Année $N-1$ \\
+  \hline
+  \hline
+  {{ liabilities }}
+  \hline
+\end{tabu}
+
+\pagebreak
+\centerline{\Huge\bf Compte de résultats}
+
+\begin{tabu} to \linewidth {|X|r||r|}
+  \hline
+  & Année $N$ & Année $N-1$ \\
+  \hline
+  {{ PL }}
+  \hline
+\end{tabu}
+
+
+
+\textit{\small Arrêté le {{ quand }}.}
+
+\end{document}
+
