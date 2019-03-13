@@ -1,0 +1,37 @@
+\documentclass[10 pt]{report}
+\usepackage[frenchb]{babel}
+%\usepackage{draftwatermark}
+%\usepackage{url}
+%%% eurosym provides \euro
+\usepackage{eurosym}
+%%% Use \pounds for GBP
+\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{longtable}
+
+%\SetWatermarkText{provisoire}
+%\SetWatermarkScale{3}
+
+\pagestyle{empty}
+\parskip=8 pt
+\raggedright
+
+\setlength{\hoffset}{-10mm}
+\addtolength{\textwidth}{30mm}
+
+\begin{document}
+
+{\Huge Soldes}
+
+\begin{longtable}[l]{l r}
+{% for account in accounts|sort(attribute='name') %}
+{{ account.name }} & {{ account.balance }} \euro \\
+{% endfor %}
+\end{longtable}
+
+\bigskip
+\textit{\small Arrêté le {{ quand }}.}
+
+\end{document}
+
