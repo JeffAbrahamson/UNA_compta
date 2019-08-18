@@ -8,7 +8,6 @@ The input is a sqlite3-format gnucash file.
 
 import argparse
 import datetime
-import datetime
 import jinja2
 import numpy as np
 import os
