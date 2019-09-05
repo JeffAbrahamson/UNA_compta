@@ -28,8 +28,12 @@ def fullname(row):
     """The human's full name.
     """
     email_1 = str(row['Email'])
-    email_2 = str(row['Champ additionnel: Email'])
-    email_3 = str(row['Champ additionnel: Email contributeur'])
+    email_2 = ''
+    if 'Champ additionnel: Email' in row:
+        email_2 = str(row['Champ additionnel: Email'])
+    email_3 = ''
+    if 'Champ additionnel: Email contributeur' in row:
+        email_3 = str(row['Champ additionnel: Email contributeur'])
     emails = set([email_1, email_2, email_3])
     other_emails = emails.difference(set([email_1]))
     email = email_1.strip()
@@ -136,7 +140,7 @@ def print_table(data_view):
     """Print a human-readable summary of the data.
     """
     data_view['date'] = data_view['transaction_date_yyyy_mm_dd']
-    table_data_view = data_view[['date', 'amount', 'fullname']]
+    table_data_view = data_view[['date', 'amount', 'account', 'fullname']]
     print(tabulate(table_data_view, showindex=False, tablefmt='fancy_grid', headers='keys'))
 
 def make_qif(data_view):
